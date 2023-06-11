@@ -11,7 +11,7 @@ import pytz
 import re
 
 from odoo import api, fields, models, tools, _
-from odoo.tools import float_is_zero, float_round, float_repr, float_compare
+from odoo.tools import float_is_zero, float_round, float_repr, float_compare, config as odoo_config
 from odoo.exceptions import ValidationError, UserError
 from odoo.osv.expression import AND
 import base64
@@ -415,8 +415,14 @@ class PosOrder(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):
-        for pos_order in self.filtered(lambda pos_order: pos_order.state not in ['draft', 'cancel']):
-            raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
+
+        payments = self.env['pos.payment'].search([('pos_order_id', '=', self.id)])
+        for payment in payments:
+            payment.unlink()
+
+        # for pos_order in self.filtered(lambda pos_order: pos_order.state not in ['draft', 'cancel']):
+        #
+        #     raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
 
     @api.model_create_multi
     def create(self, vals_list):
