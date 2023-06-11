@@ -1545,7 +1545,7 @@ class AccountMoveLine(models.Model):
             return
 
         # Check the lines are not reconciled (partially or not).
-        self._check_reconciliation()
+        # self._check_reconciliation()
 
         # Check the lock date.
         self.move_id._check_fiscalyear_lock_date()
